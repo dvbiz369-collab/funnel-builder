@@ -32,7 +32,7 @@ export default function BlockView({ block, theme, live, onNext, onAnswer, onSubm
     case "text":
       return (
         <p
-          className={`text-[15px] leading-relaxed ${block.align === "center" ? "text-center" : "text-left"}`}
+          className={`whitespace-pre-line text-[15px] leading-relaxed ${block.align === "center" ? "text-center" : "text-left"}`}
           style={{ color: s.muted }}
         >
           {block.text}
