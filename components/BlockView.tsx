@@ -97,7 +97,7 @@ export default function BlockView({ block, theme, live, onNext, onAnswer, onSubm
       );
 
     case "form":
-      return <LeadForm block={block} theme={theme} live={live} onSubmitLead={onSubmitLead} />;
+      return <LeadForm block={block} theme={theme} live={live} onSubmitLead={onSubmitLead} onNext={onNext} />;
 
     case "video": {
       const video = resolveVideo(block.url);
@@ -148,6 +148,38 @@ export default function BlockView({ block, theme, live, onNext, onAnswer, onSubm
         </div>
       );
 
+    case "calendly": {
+      if (!block.url)
+        return (
+          <div
+            className="flex h-40 w-full items-center justify-center rounded-2xl text-sm"
+            style={{ background: s.cardBg, color: s.muted }}
+          >
+            📅 Paste your Calendly link
+          </div>
+        );
+      if (!live)
+        return (
+          <div
+            className="flex h-40 w-full flex-col items-center justify-center gap-1 rounded-2xl border"
+            style={{ background: s.cardBg, borderColor: s.cardBorder }}
+          >
+            <span className="text-2xl">📅</span>
+            <span className="text-[13px] font-medium" style={{ color: s.muted }}>
+              Calendly booking calendar
+            </span>
+          </div>
+        );
+      const base = block.url.startsWith("http") ? block.url : `https://${block.url}`;
+      const sep = base.includes("?") ? "&" : "?";
+      const src = `${base}${sep}embed_type=Inline&hide_gdpr_banner=1&hide_landing_page_details=1`;
+      return (
+        <div className="w-full overflow-hidden rounded-2xl border" style={{ borderColor: s.cardBorder }}>
+          <iframe src={src} className="w-full" style={{ height: 560, border: 0 }} title="Book a meeting" />
+        </div>
+      );
+    }
+
     case "spacer":
       return <div style={{ height: SPACER_SIZES[block.size] }} />;
   }
@@ -158,11 +190,13 @@ function LeadForm({
   theme,
   live,
   onSubmitLead,
+  onNext,
 }: {
   block: Extract<Block, { type: "form" }>;
   theme: Theme;
   live: boolean;
   onSubmitLead?: (fields: Record<string, string>) => Promise<void> | void;
+  onNext?: () => void;
 }) {
   const s = themeStyles(theme);
   const [values, setValues] = useState<Record<string, string>>({});
@@ -191,6 +225,13 @@ function LeadForm({
         setStatus("sending");
         await onSubmitLead?.(values);
         setStatus("done");
+        // After-submit behavior (default: stay on success message)
+        const action = block.successAction ?? "message";
+        if (action === "next") {
+          onNext?.();
+        } else if (action === "link" && block.successHref) {
+          window.open(block.successHref, "_blank");
+        }
       }}
     >
       {block.title && <p className="text-center text-[17px] font-semibold">{block.title}</p>}

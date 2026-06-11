@@ -305,6 +305,30 @@ export default function Inspector({ funnel, block, onChangeBlock, onChangeFunnel
           <Field label="Success message">
             <input className={inputCls} value={block.successMessage} onChange={(e) => set({ successMessage: e.target.value })} />
           </Field>
+          <Field label="After submit">
+            <Seg
+              value={block.successAction ?? "message"}
+              options={[
+                { value: "message", label: "Message" },
+                { value: "next", label: "Next step" },
+                { value: "link", label: "Open link" },
+              ]}
+              onChange={(successAction) => set({ successAction })}
+            />
+          </Field>
+          {(block.successAction ?? "message") === "link" && (
+            <Field label="Link URL">
+              <input
+                className={inputCls}
+                placeholder="https://… (PDF, download, thank-you page)"
+                value={block.successHref ?? ""}
+                onChange={(e) => set({ successHref: e.target.value })}
+              />
+              <p className="mt-1.5 text-[11.5px] leading-relaxed text-zinc-400">
+                Opens after the lead is captured — perfect for delivering a lead magnet (PDF, Notion doc, video).
+              </p>
+            </Field>
+          )}
         </Pane>
       );
 
@@ -339,6 +363,24 @@ export default function Inspector({ funnel, block, onChangeBlock, onChangeFunnel
           </Field>
           <Field label="Author">
             <input className={inputCls} value={block.author} onChange={(e) => set({ author: e.target.value })} />
+          </Field>
+        </Pane>
+      );
+
+    case "calendly":
+      return (
+        <Pane title="Calendly">
+          <Field label="Calendly link">
+            <input
+              className={inputCls}
+              placeholder="calendly.com/you/intro-call"
+              value={block.url}
+              onChange={(e) => set({ url: e.target.value })}
+            />
+            <p className="mt-1.5 text-[11.5px] leading-relaxed text-zinc-400">
+              Paste your Calendly event link — the booking calendar embeds right inside the funnel step. Tip: put it
+              on the step after the lead form so you capture contact info even if they don&rsquo;t book.
+            </p>
           </Field>
         </Pane>
       );

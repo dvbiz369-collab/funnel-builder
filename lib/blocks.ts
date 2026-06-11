@@ -12,6 +12,7 @@ export const BLOCK_META: Record<
   form: { label: "Lead Form", icon: "✉", hint: "Capture name / email / phone" },
   video: { label: "Video", icon: "▶", hint: "YouTube or Vimeo embed" },
   rating: { label: "Social Proof", icon: "★", hint: "Stars + testimonial" },
+  calendly: { label: "Calendly", icon: "📅", hint: "Embedded booking calendar" },
   spacer: { label: "Spacer", icon: "⎯", hint: "Vertical space" },
 };
 
@@ -58,6 +59,8 @@ export function newBlock(type: BlockType): Block {
         collectPhone: false,
         buttonLabel: "Get access",
         successMessage: "You're in! Check your inbox. 🎉",
+        successAction: "message",
+        successHref: "",
       };
     case "video":
       return { id, type, url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" };
@@ -69,6 +72,8 @@ export function newBlock(type: BlockType): Block {
         quote: "This changed how we get clients. Booked solid in 2 weeks.",
         author: "Jamie R., Studio Owner",
       };
+    case "calendly":
+      return { id, type, url: "" };
     case "spacer":
       return { id, type, size: "md" };
   }

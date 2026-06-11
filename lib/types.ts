@@ -7,6 +7,7 @@ export type BlockType =
   | "form"
   | "video"
   | "rating"
+  | "calendly"
   | "spacer";
 
 export interface BaseBlock {
@@ -62,6 +63,10 @@ export interface FormBlock extends BaseBlock {
   collectPhone: boolean;
   buttonLabel: string;
   successMessage: string;
+  // After-submit behavior. Optional for back-compat with already-published
+  // funnels (missing → "message"). "link" = lead magnet / thank-you URL.
+  successAction?: "message" | "next" | "link";
+  successHref?: string;
 }
 
 export interface VideoBlock extends BaseBlock {
@@ -74,6 +79,11 @@ export interface RatingBlock extends BaseBlock {
   stars: number;
   quote: string;
   author: string;
+}
+
+export interface CalendlyBlock extends BaseBlock {
+  type: "calendly";
+  url: string; // calendly.com/you/intro-call (or full https URL)
 }
 
 export interface SpacerBlock extends BaseBlock {
@@ -90,6 +100,7 @@ export type Block =
   | FormBlock
   | VideoBlock
   | RatingBlock
+  | CalendlyBlock
   | SpacerBlock;
 
 export interface Step {
