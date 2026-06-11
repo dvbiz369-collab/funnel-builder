@@ -12,7 +12,7 @@ interface InspectorProps {
 
 const labelCls = "mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-zinc-400";
 const inputCls =
-  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-[13.5px] outline-none transition-colors focus:border-violet-400 focus:ring-2 focus:ring-violet-100";
+  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-[13.5px] outline-none transition-colors focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -54,7 +54,7 @@ function Toggle({ label, checked, onChange }: { label: string; checked: boolean;
     <button onClick={() => onChange(!checked)} className="flex w-full items-center justify-between py-1">
       <span className="text-[13.5px] font-medium text-zinc-700">{label}</span>
       <span
-        className={`relative h-5 w-9 rounded-full transition-colors ${checked ? "bg-violet-500" : "bg-zinc-200"}`}
+        className={`relative h-5 w-9 rounded-full transition-colors ${checked ? "bg-zinc-900" : "bg-zinc-200"}`}
       >
         <span
           className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
@@ -249,7 +249,7 @@ export default function Inspector({ funnel, block, onChangeBlock, onChangeFunnel
               {block.options.map((opt, i) => (
                 <div key={opt.id} className="flex items-center gap-1.5">
                   <input
-                    className="w-11 rounded-lg border border-zinc-200 px-0 py-2 text-center text-[14px] outline-none focus:border-violet-400"
+                    className="w-11 rounded-lg border border-zinc-200 px-0 py-2 text-center text-[14px] outline-none focus:border-zinc-500"
                     value={opt.emoji}
                     onChange={(e) => {
                       const options = [...block.options];
@@ -275,7 +275,7 @@ export default function Inspector({ funnel, block, onChangeBlock, onChangeFunnel
                 </div>
               ))}
               <button
-                className="rounded-lg border border-dashed border-zinc-300 py-2 text-[12.5px] font-medium text-zinc-500 transition-colors hover:border-violet-400 hover:text-violet-600"
+                className="rounded-lg border border-dashed border-zinc-300 py-2 text-[12.5px] font-medium text-zinc-500 transition-colors hover:border-zinc-500 hover:text-zinc-900"
                 onClick={() =>
                   set({ options: [...block.options, { id: uid(), emoji: "💡", label: "New option" }] } as Partial<ChoiceBlock>)
                 }
@@ -311,8 +311,11 @@ export default function Inspector({ funnel, block, onChangeBlock, onChangeFunnel
     case "video":
       return (
         <Pane title="Video">
-          <Field label="YouTube / Vimeo URL">
-            <input className={inputCls} value={block.url} onChange={(e) => set({ url: e.target.value })} />
+          <Field label="Video URL">
+            <input className={inputCls} placeholder="YouTube, Vimeo, Loom or .mp4 link" value={block.url} onChange={(e) => set({ url: e.target.value })} />
+            <p className="mt-1.5 text-[11.5px] leading-relaxed text-zinc-400">
+              Paste a YouTube, Vimeo or Loom link — or a direct .mp4/.webm URL to use your own video.
+            </p>
           </Field>
         </Pane>
       );

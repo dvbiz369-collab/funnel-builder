@@ -43,7 +43,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-3 text-zinc-500">
         <p>Funnel not found on this device.</p>
-        <Link href="/" className="font-semibold text-violet-600">
+        <Link href="/" className="font-semibold text-zinc-900">
           ← Back to dashboard
         </Link>
       </div>
@@ -142,7 +142,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
             key={block.id}
             onClick={() => selectBlock(block.id)}
             className={`group relative cursor-pointer rounded-xl px-1 py-1.5 transition-all ${
-              selectedBlockId === block.id ? "ring-2 ring-violet-500" : "md:hover:ring-2 md:hover:ring-violet-200"
+              selectedBlockId === block.id ? "ring-2 ring-zinc-900" : "md:hover:ring-2 md:hover:ring-zinc-300"
             }`}
           >
             <div className="pointer-events-none">
@@ -214,7 +214,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
         <input
           value={funnel.name}
           onChange={(e) => update({ ...funnel, name: e.target.value })}
-          className="min-w-0 flex-1 rounded-lg border border-transparent px-2 py-1.5 text-[14px] font-semibold outline-none md:w-64 md:flex-none md:hover:border-zinc-200 md:focus:border-violet-400"
+          className="min-w-0 flex-1 rounded-lg border border-transparent px-2 py-1.5 text-[14px] font-semibold outline-none md:w-64 md:flex-none md:hover:border-zinc-200 md:focus:border-zinc-500"
         />
         <div className="ml-auto flex shrink-0 items-center gap-2">
           <button
@@ -225,7 +225,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
           </button>
           <button
             onClick={publish}
-            className="rounded-xl bg-violet-600 px-3.5 py-2 text-[13px] font-semibold text-white shadow-sm active:bg-violet-700 md:hover:bg-violet-700"
+            className="rounded-xl bg-zinc-900 px-3.5 py-2 text-[13px] font-semibold text-white shadow-sm active:bg-zinc-700 md:hover:bg-zinc-700"
           >
             {copied ? "Copied!" : "Publish"}
           </button>
@@ -243,7 +243,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
               setSheet("none");
             }}
             className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ${
-              i === stepIndex ? "bg-violet-600 text-white" : "bg-zinc-100 text-zinc-600"
+              i === stepIndex ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600"
             }`}
           >
             {i + 1} · {st.name}
@@ -267,7 +267,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
                 <div
                   key={st.id}
                   className={`group flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors ${
-                    i === stepIndex ? "bg-violet-50 text-violet-700" : "text-zinc-600 hover:bg-zinc-50"
+                    i === stepIndex ? "bg-zinc-100 text-zinc-900" : "text-zinc-600 hover:bg-zinc-50"
                   }`}
                   onClick={() => {
                     setStepIndex(i);
@@ -276,7 +276,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
                 >
                   <span
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[11px] font-bold ${
-                      i === stepIndex ? "bg-violet-600 text-white" : "bg-zinc-100 text-zinc-500"
+                      i === stepIndex ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-500"
                     }`}
                   >
                     {i + 1}
@@ -300,7 +300,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
             </div>
             <button
               onClick={addStep}
-              className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-2 text-[12.5px] font-medium text-zinc-500 transition-colors hover:border-violet-400 hover:text-violet-600"
+              className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-2 text-[12.5px] font-medium text-zinc-500 transition-colors hover:border-zinc-500 hover:text-zinc-900"
             >
               + Add step
             </button>
@@ -313,7 +313,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
                   key={t}
                   onClick={() => addBlock(t)}
                   title={BLOCK_META[t].hint}
-                  className="flex flex-col items-start gap-1 rounded-xl border border-zinc-200 p-2.5 text-left transition-all hover:border-violet-300 hover:bg-violet-50/50 hover:shadow-sm"
+                  className="flex flex-col items-start gap-1 rounded-xl border border-zinc-200 p-2.5 text-left transition-all hover:border-zinc-400 hover:bg-zinc-50 hover:shadow-sm"
                 >
                   <span className="text-[15px] leading-none">{BLOCK_META[t].icon}</span>
                   <span className="text-[11.5px] font-semibold text-zinc-700">{BLOCK_META[t].label}</span>
@@ -349,7 +349,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
       <div className="flex shrink-0 items-center gap-2 border-t border-zinc-200 bg-white px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] md:hidden">
         <button
           onClick={() => setSheet(sheet === "blocks" ? "none" : "blocks")}
-          className="flex-1 rounded-xl bg-violet-600 py-3 text-[14px] font-semibold text-white active:bg-violet-700"
+          className="flex-1 rounded-xl bg-zinc-900 py-3 text-[14px] font-semibold text-white active:bg-zinc-700"
         >
           + Block
         </button>
@@ -381,7 +381,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
                     <button
                       key={t}
                       onClick={() => addBlock(t)}
-                      className="flex flex-col items-center gap-1.5 rounded-xl border border-zinc-200 px-2 py-3 active:border-violet-300 active:bg-violet-50"
+                      className="flex flex-col items-center gap-1.5 rounded-xl border border-zinc-200 px-2 py-3 active:border-zinc-400 active:bg-zinc-100"
                     >
                       <span className="text-[18px] leading-none">{BLOCK_META[t].icon}</span>
                       <span className="text-center text-[11px] font-semibold leading-tight text-zinc-700">

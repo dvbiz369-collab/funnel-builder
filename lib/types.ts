@@ -115,7 +115,7 @@ export interface Funnel {
 }
 
 export const DEFAULT_THEME: Theme = {
-  primary: "#6356F6",
+  primary: "#18181B",
   background: "light",
   font: "sans",
 };

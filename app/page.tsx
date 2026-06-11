@@ -6,6 +6,7 @@ import { Funnel } from "@/lib/types";
 import { listFunnels, saveFunnel, deleteFunnel } from "@/lib/storage";
 import { TEMPLATES } from "@/lib/templates";
 import { publishUrl } from "@/lib/encode";
+import Logo from "@/components/Logo";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -40,11 +41,9 @@ export default function Dashboard() {
     <div className="min-h-screen bg-zinc-50">
       <header className="border-b border-zinc-200 bg-white">
         <div className="mx-auto flex h-16 max-w-5xl items-center gap-2.5 px-6">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-violet-600 text-[15px] font-bold text-white shadow-sm">
-            F
-          </span>
+          <Logo />
           <span className="text-[15px] font-bold tracking-tight text-zinc-900">Funnelly</span>
-          <span className="ml-2 rounded-full bg-violet-50 px-2.5 py-0.5 text-[11px] font-semibold text-violet-600">
+          <span className="ml-2 rounded-full bg-zinc-100 px-2.5 py-0.5 text-[11px] font-semibold text-zinc-900">
             Mobile funnels in minutes
           </span>
         </div>
@@ -58,12 +57,12 @@ export default function Dashboard() {
             <button
               key={t.id}
               onClick={() => createFrom(t.id)}
-              className="group flex flex-col items-start gap-2 rounded-2xl border border-zinc-200 bg-white p-5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-md"
+              className="group flex flex-col items-start gap-2 rounded-2xl border border-zinc-200 bg-white p-5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-zinc-400 hover:shadow-md"
             >
               <span className="text-2xl">{t.emoji}</span>
               <span className="text-[14.5px] font-bold text-zinc-900">{t.name}</span>
               <span className="text-[12.5px] leading-relaxed text-zinc-500">{t.description}</span>
-              <span className="mt-1 text-[12.5px] font-semibold text-violet-600 opacity-0 transition-opacity group-hover:opacity-100">
+              <span className="mt-1 text-[12.5px] font-semibold text-zinc-900 opacity-0 transition-opacity group-hover:opacity-100">
                 Use template →
               </span>
             </button>

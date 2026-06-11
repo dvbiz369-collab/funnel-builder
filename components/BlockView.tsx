@@ -1,7 +1,7 @@
 "use client";
 
 import { Block, Theme } from "@/lib/types";
-import { themeStyles, videoEmbedUrl } from "@/lib/theme";
+import { themeStyles, resolveVideo } from "@/lib/theme";
 import { useState } from "react";
 
 interface BlockViewProps {
@@ -100,28 +100,36 @@ export default function BlockView({ block, theme, live, onNext, onAnswer, onSubm
       return <LeadForm block={block} theme={theme} live={live} onSubmitLead={onSubmitLead} />;
 
     case "video": {
-      const embed = videoEmbedUrl(block.url);
-      if (!embed)
+      const video = resolveVideo(block.url);
+      if (!video)
         return (
           <div
             className="flex aspect-video w-full items-center justify-center rounded-2xl text-sm"
             style={{ background: s.cardBg, color: s.muted }}
           >
-            Paste a YouTube or Vimeo URL
+            Paste a YouTube, Vimeo, Loom or MP4 URL
           </div>
         );
+      if (!live)
+        return (
+          <div className="flex aspect-video w-full items-center justify-center rounded-2xl bg-black">
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 pl-1 text-xl">▶</span>
+          </div>
+        );
+      if (video.kind === "file")
+        return (
+          <video
+            src={video.src}
+            controls
+            playsInline
+            preload="metadata"
+            className="w-full rounded-2xl bg-black object-contain"
+            style={{ maxHeight: 420 }}
+          />
+        );
       return (
-        <div className="aspect-video w-full overflow-hidden rounded-2xl">
-          {live ? (
-            <iframe src={embed} className="h-full w-full" allowFullScreen allow="accelerometer; autoplay; encrypted-media" />
-          ) : (
-            <div
-              className="flex h-full w-full items-center justify-center"
-              style={{ background: "#000" }}
-            >
-              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 pl-1 text-xl">▶</span>
-            </div>
-          )}
+        <div className="aspect-video w-full overflow-hidden rounded-2xl bg-black">
+          <iframe src={video.src} className="h-full w-full" allowFullScreen allow="accelerometer; autoplay; encrypted-media" />
         </div>
       );
     }

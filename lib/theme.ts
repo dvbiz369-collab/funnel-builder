@@ -1,14 +1,14 @@
 import { Theme } from "./types";
 
 export const PRIMARY_PRESETS = [
-  "#6356F6", // violet
+  "#18181B", // ink
+  "#52525B", // grey
   "#2563EB", // blue
   "#0EA5E9", // sky
   "#10B981", // emerald
   "#F59E0B", // amber
   "#EF4444", // red
   "#EC4899", // pink
-  "#111827", // ink
 ];
 
 export function themeStyles(theme: Theme) {
@@ -40,20 +40,30 @@ export function themeStyles(theme: Theme) {
   };
 }
 
-export function videoEmbedUrl(url: string): string | null {
+export type VideoSource =
+  | { kind: "embed"; src: string }
+  | { kind: "file"; src: string }
+  | null;
+
+export function resolveVideo(url: string): VideoSource {
   try {
     const u = new URL(url);
     if (u.hostname.includes("youtube.com")) {
-      const id = u.searchParams.get("v");
-      return id ? `https://www.youtube.com/embed/${id}` : null;
+      const id = u.searchParams.get("v") ?? u.pathname.match(/\/(shorts|embed)\/([\w-]+)/)?.[2];
+      return id ? { kind: "embed", src: `https://www.youtube.com/embed/${id}` } : null;
     }
     if (u.hostname === "youtu.be") {
-      return `https://www.youtube.com/embed/${u.pathname.slice(1)}`;
+      return { kind: "embed", src: `https://www.youtube.com/embed/${u.pathname.slice(1)}` };
     }
     if (u.hostname.includes("vimeo.com")) {
-      return `https://player.vimeo.com/video/${u.pathname.slice(1)}`;
+      return { kind: "embed", src: `https://player.vimeo.com/video/${u.pathname.slice(1)}` };
     }
-    return null;
+    if (u.hostname.includes("loom.com")) {
+      const id = u.pathname.split("/").pop();
+      return id ? { kind: "embed", src: `https://www.loom.com/embed/${id}` } : null;
+    }
+    // Anything else with a real URL — treat as a direct video file (mp4, webm, mov, CDN links)
+    return { kind: "file", src: url };
   } catch {
     return null;
   }

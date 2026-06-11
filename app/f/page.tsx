@@ -28,7 +28,7 @@ export default function PublishedFunnel() {
       <div className="flex h-screen flex-col items-center justify-center gap-3 bg-zinc-50 text-zinc-500">
         <span className="text-3xl">🔗</span>
         <p className="text-[14px]">This funnel link is invalid or incomplete.</p>
-        <Link href="/" className="text-[14px] font-semibold text-violet-600">
+        <Link href="/" className="text-[14px] font-semibold text-zinc-900">
           Build your own funnel →
         </Link>
       </div>
