@@ -211,7 +211,8 @@ export default function Inspector({ funnel, block, onChangeBlock, onChangeFunnel
               value={block.action}
               options={[
                 { value: "next", label: "Next step" },
-                { value: "link", label: "Open link" },
+                { value: "link", label: "Link" },
+                { value: "call", label: "Call" },
               ]}
               onChange={(action) => set({ action })}
             />
@@ -219,6 +220,19 @@ export default function Inspector({ funnel, block, onChangeBlock, onChangeFunnel
           {block.action === "link" && (
             <Field label="Link URL">
               <input className={inputCls} placeholder="https://…" value={block.href} onChange={(e) => set({ href: e.target.value })} />
+            </Field>
+          )}
+          {block.action === "call" && (
+            <Field label="Phone number">
+              <input
+                className={inputCls}
+                placeholder="+1 555 123 4567"
+                value={block.phone ?? ""}
+                onChange={(e) => set({ phone: e.target.value })}
+              />
+              <p className="mt-1.5 text-[11.5px] leading-relaxed text-zinc-400">
+                Tap dials this number directly — perfect for &ldquo;Call us now&rdquo; on mobile.
+              </p>
             </Field>
           )}
         </Pane>

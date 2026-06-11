@@ -57,13 +57,16 @@ export default function BlockView({ block, theme, live, onNext, onAnswer, onSubm
           style={{ background: theme.primary, boxShadow: `0 8px 24px -8px ${theme.primary}99` }}
           onClick={() => {
             if (!live) return;
-            if (block.action === "link" && block.href) {
+            if (block.action === "call" && block.phone) {
+              window.location.href = `tel:${block.phone.replace(/[^+\d]/g, "")}`;
+            } else if (block.action === "link" && block.href) {
               window.open(block.href, "_blank");
             } else {
               onNext?.();
             }
           }}
         >
+          {block.action === "call" ? "📞 " : ""}
           {block.label}
         </button>
       );

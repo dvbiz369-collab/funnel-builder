@@ -37,8 +37,9 @@ export interface ImageBlock extends BaseBlock {
 export interface ButtonBlock extends BaseBlock {
   type: "button";
   label: string;
-  action: "next" | "link";
+  action: "next" | "link" | "call";
   href: string;
+  phone?: string;
 }
 
 export interface ChoiceOption {
