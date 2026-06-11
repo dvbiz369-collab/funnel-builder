@@ -53,7 +53,7 @@ export default function Dashboard() {
       <main className="mx-auto max-w-5xl px-6 py-10">
         <h2 className="mb-1 text-[20px] font-bold tracking-tight text-zinc-900">Start a new funnel</h2>
         <p className="mb-5 text-[14px] text-zinc-500">Pick a template — everything is editable.</p>
-        <div className="mb-12 grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="mb-12 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {TEMPLATES.map((t) => (
             <button
               key={t.id}
@@ -80,7 +80,8 @@ export default function Dashboard() {
           {funnels.map((f) => (
             <div
               key={f.id}
-              className="flex items-center gap-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
+              onClick={() => router.push(`/edit/${f.id}`)}
+              className="flex cursor-pointer items-center gap-3 rounded-2xl border border-zinc-200 bg-white p-3.5 shadow-sm transition-shadow active:bg-zinc-50 sm:gap-4 sm:p-4 md:hover:shadow-md"
             >
               <span
                 className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-[15px] font-bold text-white"
@@ -91,27 +92,25 @@ export default function Dashboard() {
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[14.5px] font-bold text-zinc-900">{f.name}</p>
                 <p className="text-[12.5px] text-zinc-400">
-                  {f.steps.length} step{f.steps.length === 1 ? "" : "s"} · updated{" "}
+                  {f.steps.length} step{f.steps.length === 1 ? "" : "s"} ·{" "}
                   {new Date(f.updatedAt).toLocaleDateString()}
                 </p>
               </div>
               <button
-                onClick={() => copyLink(f)}
-                className="rounded-xl bg-zinc-100 px-3.5 py-2 text-[12.5px] font-semibold text-zinc-700 transition-colors hover:bg-zinc-200"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  copyLink(f);
+                }}
+                className="shrink-0 rounded-xl bg-zinc-100 px-3 py-2 text-[12.5px] font-semibold text-zinc-700 active:bg-zinc-200 md:hover:bg-zinc-200"
               >
-                {copiedId === f.id ? "✓ Copied" : "Copy link"}
+                {copiedId === f.id ? "✓" : "Share"}
               </button>
               <button
-                onClick={() => router.push(`/edit/${f.id}`)}
-                className="rounded-xl bg-violet-600 px-3.5 py-2 text-[12.5px] font-semibold text-white transition-colors hover:bg-violet-700"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   if (confirm(`Delete "${f.name}"? This can't be undone.`)) remove(f.id);
                 }}
-                className="rounded-xl px-2 py-2 text-zinc-300 transition-colors hover:text-red-500"
+                className="shrink-0 rounded-xl px-1.5 py-2 text-zinc-300 active:text-red-500 md:hover:text-red-500"
               >
                 ✕
               </button>

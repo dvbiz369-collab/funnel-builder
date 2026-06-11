@@ -14,6 +14,8 @@ import Inspector from "@/components/Inspector";
 
 const BLOCK_TYPES = Object.keys(BLOCK_META) as BlockType[];
 
+type Sheet = "none" | "blocks" | "inspector";
+
 export default function EditorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [funnel, setFunnel] = useState<Funnel | null>(null);
@@ -22,6 +24,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
   const [preview, setPreview] = useState(false);
   const [copied, setCopied] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [sheet, setSheet] = useState<Sheet>("none");
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -30,7 +33,6 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
     else setNotFound(true);
   }, [id]);
 
-  // Debounced autosave
   const update = (next: Funnel) => {
     setFunnel(next);
     if (saveTimer.current) clearTimeout(saveTimer.current);
@@ -61,6 +63,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
     const block = newBlock(type);
     updateStep({ blocks: [...step.blocks, block] });
     setSelectedBlockId(block.id);
+    setSheet("inspector");
   };
 
   const changeBlock = (block: Block) => {
@@ -78,7 +81,10 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
 
   const deleteBlock = (blockId: string) => {
     updateStep({ blocks: step.blocks.filter((b) => b.id !== blockId) });
-    if (selectedBlockId === blockId) setSelectedBlockId(null);
+    if (selectedBlockId === blockId) {
+      setSelectedBlockId(null);
+      setSheet("none");
+    }
   };
 
   const addStep = () => {
@@ -106,178 +112,299 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
     else if (stepIndex === j) setStepIndex(i);
   };
 
-  const copyPublishLink = async () => {
+  const publish = async () => {
     saveFunnel(funnel);
-    await navigator.clipboard.writeText(publishUrl(funnel));
+    const url = publishUrl(funnel);
+    if (navigator.share && /Mobi|Android/i.test(navigator.userAgent)) {
+      try {
+        await navigator.share({ title: funnel.name, url });
+        return;
+      } catch {
+        // user cancelled share — fall through to clipboard
+      }
+    }
+    await navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const selectBlock = (blockId: string) => {
+    setSelectedBlockId(blockId);
+    setSheet("inspector");
+  };
+
+  // Shared canvas — phone-framed on desktop, full-bleed on mobile
+  const canvas = (
+    <div className="flex h-full flex-col overflow-y-auto" style={s.container}>
+      <div className="flex flex-1 flex-col justify-center gap-1 px-4 py-7">
+        {step.blocks.map((block, i) => (
+          <div
+            key={block.id}
+            onClick={() => selectBlock(block.id)}
+            className={`group relative cursor-pointer rounded-xl px-1 py-1.5 transition-all ${
+              selectedBlockId === block.id ? "ring-2 ring-violet-500" : "md:hover:ring-2 md:hover:ring-violet-200"
+            }`}
+          >
+            <div className="pointer-events-none">
+              <BlockView block={block} theme={funnel.theme} live={false} />
+            </div>
+            <div
+              className={`absolute -top-3 right-1 z-10 items-center gap-1 rounded-lg border border-zinc-200 bg-white px-1 py-0.5 shadow-md ${
+                selectedBlockId === block.id ? "flex" : "hidden md:group-hover:flex"
+              }`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button className="px-1.5 py-0.5 text-[13px] text-zinc-400 active:text-zinc-800 disabled:opacity-30 md:hover:text-zinc-800" disabled={i === 0} onClick={() => moveBlock(block.id, -1)}>↑</button>
+              <button className="px-1.5 py-0.5 text-[13px] text-zinc-400 active:text-zinc-800 disabled:opacity-30 md:hover:text-zinc-800" disabled={i === step.blocks.length - 1} onClick={() => moveBlock(block.id, 1)}>↓</button>
+              <button className="px-1.5 py-0.5 text-[13px] text-zinc-400 active:text-red-500 md:hover:text-red-500" onClick={() => deleteBlock(block.id)}>✕</button>
+            </div>
+          </div>
+        ))}
+        {step.blocks.length === 0 && (
+          <div className="flex flex-col items-center gap-2 py-16 text-center">
+            <span className="text-2xl">👋</span>
+            <p className="text-[13.5px] font-medium" style={{ color: s.muted }}>
+              This step is empty.
+              <br />
+              Tap <b>+ Block</b> to add one.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  // ── Preview mode: full-screen on mobile, phone frame on desktop ──
+  if (preview) {
+    return (
+      <div className="flex h-[100dvh] flex-col bg-zinc-50">
+        <header className="flex h-12 shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-3">
+          <span className="truncate px-1 text-[14px] font-semibold text-zinc-800">{funnel.name}</span>
+          <button
+            onClick={() => setPreview(false)}
+            className="rounded-lg bg-zinc-900 px-3.5 py-1.5 text-[13px] font-semibold text-white"
+          >
+            Done
+          </button>
+        </header>
+        <div className="min-h-0 flex-1 md:flex md:items-center md:justify-center md:p-8">
+          <div className="h-full md:hidden">
+            <FunnelRunner key={funnel.updatedAt} funnel={funnel} />
+          </div>
+          <div className="hidden md:block">
+            <PhoneFrame>
+              <FunnelRunner key={funnel.updatedAt} funnel={funnel} />
+            </PhoneFrame>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex h-screen flex-col bg-zinc-50">
+    <div className="flex h-[100dvh] flex-col bg-zinc-50">
       {/* Top bar */}
-      <header className="flex h-14 shrink-0 items-center gap-3 border-b border-zinc-200 bg-white px-4">
+      <header className="flex h-12 shrink-0 items-center gap-2 border-b border-zinc-200 bg-white px-3 md:h-14 md:px-4">
         <Link
           href="/"
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-zinc-400 active:bg-zinc-100 md:hover:bg-zinc-100 md:hover:text-zinc-700"
         >
           ←
         </Link>
         <input
           value={funnel.name}
           onChange={(e) => update({ ...funnel, name: e.target.value })}
-          className="w-64 rounded-lg border border-transparent px-2 py-1.5 text-[14px] font-semibold outline-none transition-colors hover:border-zinc-200 focus:border-violet-400"
+          className="min-w-0 flex-1 rounded-lg border border-transparent px-2 py-1.5 text-[14px] font-semibold outline-none md:w-64 md:flex-none md:hover:border-zinc-200 md:focus:border-violet-400"
         />
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex shrink-0 items-center gap-2">
           <button
-            onClick={() => setPreview(!preview)}
-            className={`rounded-xl px-4 py-2 text-[13px] font-semibold transition-colors ${
-              preview ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
-            }`}
+            onClick={() => setPreview(true)}
+            className="rounded-xl bg-zinc-100 px-3.5 py-2 text-[13px] font-semibold text-zinc-700 active:bg-zinc-200 md:hover:bg-zinc-200"
           >
-            {preview ? "✕ Exit preview" : "▶ Preview"}
+            Preview
           </button>
           <button
-            onClick={copyPublishLink}
-            className="rounded-xl bg-violet-600 px-4 py-2 text-[13px] font-semibold text-white shadow-sm transition-colors hover:bg-violet-700"
+            onClick={publish}
+            className="rounded-xl bg-violet-600 px-3.5 py-2 text-[13px] font-semibold text-white shadow-sm active:bg-violet-700 md:hover:bg-violet-700"
           >
-            {copied ? "✓ Link copied!" : "Publish · Copy link"}
+            {copied ? "Copied!" : "Publish"}
           </button>
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1">
-        {/* Left: steps + blocks */}
-        {!preview && (
-          <aside className="flex w-60 shrink-0 flex-col overflow-y-auto border-r border-zinc-200 bg-white">
-            <div className="border-b border-zinc-100 p-3">
-              <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Steps</p>
-              <div className="flex flex-col gap-1">
-                {funnel.steps.map((st, i) => (
-                  <div
-                    key={st.id}
-                    className={`group flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors ${
-                      i === stepIndex ? "bg-violet-50 text-violet-700" : "text-zinc-600 hover:bg-zinc-50"
-                    }`}
-                    onClick={() => {
-                      setStepIndex(i);
-                      setSelectedBlockId(null);
-                    }}
-                  >
-                    <span
-                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[11px] font-bold ${
-                        i === stepIndex ? "bg-violet-600 text-white" : "bg-zinc-100 text-zinc-500"
-                      }`}
-                    >
-                      {i + 1}
-                    </span>
-                    <input
-                      value={st.name}
-                      onClick={(e) => e.stopPropagation()}
-                      onChange={(e) => {
-                        const steps = funnel.steps.map((x, idx) => (idx === i ? { ...x, name: e.target.value } : x));
-                        update({ ...funnel, steps });
-                      }}
-                      className="w-full min-w-0 bg-transparent outline-none"
-                    />
-                    <span className="hidden shrink-0 gap-0.5 group-hover:flex">
-                      <button className="text-zinc-300 hover:text-zinc-600" onClick={(e) => { e.stopPropagation(); moveStep(i, -1); }}>↑</button>
-                      <button className="text-zinc-300 hover:text-zinc-600" onClick={(e) => { e.stopPropagation(); moveStep(i, 1); }}>↓</button>
-                      <button className="text-zinc-300 hover:text-red-500" onClick={(e) => { e.stopPropagation(); deleteStep(i); }}>✕</button>
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <button
-                onClick={addStep}
-                className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-2 text-[12.5px] font-medium text-zinc-500 transition-colors hover:border-violet-400 hover:text-violet-600"
-              >
-                + Add step
-              </button>
-            </div>
-            <div className="p-3">
-              <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Add blocks</p>
-              <div className="grid grid-cols-2 gap-1.5">
-                {BLOCK_TYPES.map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => addBlock(t)}
-                    title={BLOCK_META[t].hint}
-                    className="flex flex-col items-start gap-1 rounded-xl border border-zinc-200 p-2.5 text-left transition-all hover:border-violet-300 hover:bg-violet-50/50 hover:shadow-sm"
-                  >
-                    <span className="text-[15px] leading-none">{BLOCK_META[t].icon}</span>
-                    <span className="text-[11.5px] font-semibold text-zinc-700">{BLOCK_META[t].label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </aside>
-        )}
+      {/* Mobile: step chips */}
+      <div className="flex shrink-0 items-center gap-1.5 overflow-x-auto border-b border-zinc-200 bg-white px-3 py-2 md:hidden">
+        {funnel.steps.map((st, i) => (
+          <button
+            key={st.id}
+            onClick={() => {
+              setStepIndex(i);
+              setSelectedBlockId(null);
+              setSheet("none");
+            }}
+            className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ${
+              i === stepIndex ? "bg-violet-600 text-white" : "bg-zinc-100 text-zinc-600"
+            }`}
+          >
+            {i + 1} · {st.name}
+          </button>
+        ))}
+        <button
+          onClick={addStep}
+          className="shrink-0 rounded-full border border-dashed border-zinc-300 px-3 py-1.5 text-[12.5px] font-semibold text-zinc-500"
+        >
+          +
+        </button>
+      </div>
 
-        {/* Center: canvas */}
-        <main className="flex min-w-0 flex-1 items-center justify-center overflow-auto p-8">
-          <PhoneFrame>
-            {preview ? (
-              <FunnelRunner key={JSON.stringify(funnel.theme) + funnel.steps.length} funnel={funnel} />
-            ) : (
-              <div className="flex h-full flex-col overflow-y-auto" style={s.container}>
-                <div className="flex flex-1 flex-col justify-center gap-1 px-4 py-7">
-                  {step.blocks.map((block, i) => (
-                    <div
-                      key={block.id}
-                      onClick={() => setSelectedBlockId(block.id)}
-                      className={`group relative cursor-pointer rounded-xl px-1 py-1.5 transition-all ${
-                        selectedBlockId === block.id
-                          ? "ring-2 ring-violet-500"
-                          : "hover:ring-2 hover:ring-violet-200"
-                      }`}
-                    >
-                      <div className="pointer-events-none">
-                        <BlockView block={block} theme={funnel.theme} live={false} />
-                      </div>
-                      <div
-                        className={`absolute -right-1 -top-3 z-10 hidden items-center gap-0.5 rounded-lg border border-zinc-200 bg-white px-1 py-0.5 shadow-md ${
-                          selectedBlockId === block.id ? "flex" : "group-hover:flex"
-                        }`}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <button className="px-1 text-[11px] text-zinc-400 hover:text-zinc-800 disabled:opacity-30" disabled={i === 0} onClick={() => moveBlock(block.id, -1)}>↑</button>
-                        <button className="px-1 text-[11px] text-zinc-400 hover:text-zinc-800 disabled:opacity-30" disabled={i === step.blocks.length - 1} onClick={() => moveBlock(block.id, 1)}>↓</button>
-                        <button className="px-1 text-[11px] text-zinc-400 hover:text-red-500" onClick={() => deleteBlock(block.id)}>✕</button>
-                      </div>
-                    </div>
-                  ))}
-                  {step.blocks.length === 0 && (
-                    <div className="flex flex-col items-center gap-2 py-16 text-center">
-                      <span className="text-2xl">👋</span>
-                      <p className="text-[13.5px] font-medium" style={{ color: s.muted }}>
-                        Add your first block
-                        <br />
-                        from the left panel
-                      </p>
-                    </div>
-                  )}
+      <div className="flex min-h-0 flex-1">
+        {/* Desktop left: steps + blocks */}
+        <aside className="hidden w-60 shrink-0 flex-col overflow-y-auto border-r border-zinc-200 bg-white md:flex">
+          <div className="border-b border-zinc-100 p-3">
+            <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Steps</p>
+            <div className="flex flex-col gap-1">
+              {funnel.steps.map((st, i) => (
+                <div
+                  key={st.id}
+                  className={`group flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors ${
+                    i === stepIndex ? "bg-violet-50 text-violet-700" : "text-zinc-600 hover:bg-zinc-50"
+                  }`}
+                  onClick={() => {
+                    setStepIndex(i);
+                    setSelectedBlockId(null);
+                  }}
+                >
+                  <span
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[11px] font-bold ${
+                      i === stepIndex ? "bg-violet-600 text-white" : "bg-zinc-100 text-zinc-500"
+                    }`}
+                  >
+                    {i + 1}
+                  </span>
+                  <input
+                    value={st.name}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => {
+                      const steps = funnel.steps.map((x, idx) => (idx === i ? { ...x, name: e.target.value } : x));
+                      update({ ...funnel, steps });
+                    }}
+                    className="w-full min-w-0 bg-transparent outline-none"
+                  />
+                  <span className="hidden shrink-0 gap-0.5 group-hover:flex">
+                    <button className="text-zinc-300 hover:text-zinc-600" onClick={(e) => { e.stopPropagation(); moveStep(i, -1); }}>↑</button>
+                    <button className="text-zinc-300 hover:text-zinc-600" onClick={(e) => { e.stopPropagation(); moveStep(i, 1); }}>↓</button>
+                    <button className="text-zinc-300 hover:text-red-500" onClick={(e) => { e.stopPropagation(); deleteStep(i); }}>✕</button>
+                  </span>
                 </div>
-              </div>
-            )}
-          </PhoneFrame>
+              ))}
+            </div>
+            <button
+              onClick={addStep}
+              className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-2 text-[12.5px] font-medium text-zinc-500 transition-colors hover:border-violet-400 hover:text-violet-600"
+            >
+              + Add step
+            </button>
+          </div>
+          <div className="p-3">
+            <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Add blocks</p>
+            <div className="grid grid-cols-2 gap-1.5">
+              {BLOCK_TYPES.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => addBlock(t)}
+                  title={BLOCK_META[t].hint}
+                  className="flex flex-col items-start gap-1 rounded-xl border border-zinc-200 p-2.5 text-left transition-all hover:border-violet-300 hover:bg-violet-50/50 hover:shadow-sm"
+                >
+                  <span className="text-[15px] leading-none">{BLOCK_META[t].icon}</span>
+                  <span className="text-[11.5px] font-semibold text-zinc-700">{BLOCK_META[t].label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </aside>
+
+        {/* Canvas */}
+        <main className="min-w-0 flex-1 md:flex md:items-center md:justify-center md:overflow-auto md:p-8">
+          <div className="h-full md:hidden">{canvas}</div>
+          <div className="hidden md:block">
+            <PhoneFrame>{canvas}</PhoneFrame>
+          </div>
         </main>
 
-        {/* Right: inspector */}
-        {!preview && (
-          <aside className="w-72 shrink-0 overflow-y-auto border-l border-zinc-200 bg-white p-4">
-            <Inspector funnel={funnel} block={selectedBlock} onChangeBlock={changeBlock} onChangeFunnel={update} />
-            {selectedBlock && (
-              <button
-                onClick={() => setSelectedBlockId(null)}
-                className="mt-5 w-full rounded-lg bg-zinc-100 py-2 text-[12.5px] font-medium text-zinc-600 transition-colors hover:bg-zinc-200"
-              >
-                ← Funnel design settings
-              </button>
-            )}
-          </aside>
-        )}
+        {/* Desktop right: inspector */}
+        <aside className="hidden w-72 shrink-0 overflow-y-auto border-l border-zinc-200 bg-white p-4 md:block">
+          <Inspector funnel={funnel} block={selectedBlock} onChangeBlock={changeBlock} onChangeFunnel={update} />
+          {selectedBlock && (
+            <button
+              onClick={() => setSelectedBlockId(null)}
+              className="mt-5 w-full rounded-lg bg-zinc-100 py-2 text-[12.5px] font-medium text-zinc-600 transition-colors hover:bg-zinc-200"
+            >
+              ← Funnel design settings
+            </button>
+          )}
+        </aside>
       </div>
+
+      {/* Mobile bottom bar */}
+      <div className="flex shrink-0 items-center gap-2 border-t border-zinc-200 bg-white px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] md:hidden">
+        <button
+          onClick={() => setSheet(sheet === "blocks" ? "none" : "blocks")}
+          className="flex-1 rounded-xl bg-violet-600 py-3 text-[14px] font-semibold text-white active:bg-violet-700"
+        >
+          + Block
+        </button>
+        <button
+          onClick={() => {
+            setSelectedBlockId(null);
+            setSheet(sheet === "inspector" && !selectedBlock ? "none" : "inspector");
+          }}
+          className="flex-1 rounded-xl bg-zinc-100 py-3 text-[14px] font-semibold text-zinc-700 active:bg-zinc-200"
+        >
+          Design
+        </button>
+      </div>
+
+      {/* Mobile sheets */}
+      {sheet !== "none" && (
+        <div className="fixed inset-0 z-40 md:hidden" onClick={() => setSheet("none")}>
+          <div className="absolute inset-0 bg-black/30" />
+          <div
+            className="absolute inset-x-0 bottom-0 max-h-[72dvh] overflow-y-auto rounded-t-2xl bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-zinc-200" />
+            {sheet === "blocks" ? (
+              <>
+                <p className="mb-3 text-[13px] font-bold text-zinc-900">Add a block</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {BLOCK_TYPES.map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => addBlock(t)}
+                      className="flex flex-col items-center gap-1.5 rounded-xl border border-zinc-200 px-2 py-3 active:border-violet-300 active:bg-violet-50"
+                    >
+                      <span className="text-[18px] leading-none">{BLOCK_META[t].icon}</span>
+                      <span className="text-center text-[11px] font-semibold leading-tight text-zinc-700">
+                        {BLOCK_META[t].label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <Inspector funnel={funnel} block={selectedBlock} onChangeBlock={changeBlock} onChangeFunnel={update} />
+                <button
+                  onClick={() => setSheet("none")}
+                  className="mt-5 w-full rounded-xl bg-zinc-900 py-3 text-[14px] font-semibold text-white"
+                >
+                  Done
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
