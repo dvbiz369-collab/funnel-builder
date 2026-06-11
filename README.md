@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Funnelly — mobile funnels in minutes
 
-## Getting Started
+A free, open Perspective-style funnel builder. Build beautiful mobile-first funnels (quiz steps, lead forms, social proof) and share them with a single link.
 
-First, run the development server:
+**Zero running cost by design:**
+- No database — funnels are saved in your browser (localStorage)
+- No backend — publishing packs the entire funnel into the share URL (lz-string compression, decoded client-side at `/f#…`)
+- No AI calls — nothing burns credits
+- No accounts, no auth, nothing to maintain
+
+## Features
+
+- 📱 Mobile-first editor with live phone canvas (Perspective-style)
+- 🧱 9 block types: heading, text, image, button, quiz choice, lead form, video, social proof, spacer
+- 🪜 Multi-step funnels with progress bar and step transitions
+- 🎨 Theming: brand color, light/gradient/dark backgrounds, font styles
+- 🧲 4 templates: Blank, Lead Magnet, Quiz Funnel, Service Booking
+- 📬 Lead capture posts JSON to any webhook (GoHighLevel, Make, Zapier, n8n) with quiz answers attached
+- 🔗 One-click publish — copy the link, send it anywhere
+
+## Run locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Deploy
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Push to GitHub and import on [Vercel](https://vercel.com) — no env vars, no config needed.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## How publishing works
 
-## Learn More
+The editor serializes the funnel JSON, compresses it with `lz-string`, and puts it in the URL hash. The `/f` route decompresses and renders it. The funnel literally *is* the link — host it once, share unlimited funnels for free.
 
-To learn more about Next.js, take a look at the following resources:
+## Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Next.js (App Router) · React · Tailwind CSS · lz-string
