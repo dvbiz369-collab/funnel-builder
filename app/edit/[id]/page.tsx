@@ -11,6 +11,7 @@ import BlockView from "@/components/BlockView";
 import FunnelRunner from "@/components/FunnelRunner";
 import PhoneFrame from "@/components/PhoneFrame";
 import Inspector from "@/components/Inspector";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const BLOCK_TYPES = Object.keys(BLOCK_META) as BlockType[];
 
@@ -41,9 +42,9 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
 
   if (notFound)
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-3 text-zinc-500">
+      <div className="flex h-screen flex-col items-center justify-center gap-3 bg-canvas text-ink-2">
         <p>Funnel not found on this device.</p>
-        <Link href="/" className="font-semibold text-zinc-900">
+        <Link href="/" className="font-medium text-accent">
           ← Back to dashboard
         </Link>
       </div>
@@ -142,21 +143,21 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
             key={block.id}
             onClick={() => selectBlock(block.id)}
             className={`group relative cursor-pointer rounded-xl px-1 py-1.5 transition-all ${
-              selectedBlockId === block.id ? "ring-2 ring-zinc-900" : "md:hover:ring-2 md:hover:ring-zinc-300"
+              selectedBlockId === block.id ? "ring-2 ring-accent" : "md:hover:ring-2 md:hover:ring-line"
             }`}
           >
             <div className="pointer-events-none">
               <BlockView block={block} theme={funnel.theme} live={false} />
             </div>
             <div
-              className={`absolute -top-3 right-1 z-10 items-center gap-1 rounded-lg border border-zinc-200 bg-white px-1 py-0.5 shadow-md ${
+              className={`absolute -top-3 right-1 z-10 items-center gap-1 rounded-lg border border-line bg-surface px-1 py-0.5 shadow-md ${
                 selectedBlockId === block.id ? "flex" : "hidden md:group-hover:flex"
               }`}
               onClick={(e) => e.stopPropagation()}
             >
-              <button className="px-1.5 py-0.5 text-[13px] text-zinc-400 active:text-zinc-800 disabled:opacity-30 md:hover:text-zinc-800" disabled={i === 0} onClick={() => moveBlock(block.id, -1)}>↑</button>
-              <button className="px-1.5 py-0.5 text-[13px] text-zinc-400 active:text-zinc-800 disabled:opacity-30 md:hover:text-zinc-800" disabled={i === step.blocks.length - 1} onClick={() => moveBlock(block.id, 1)}>↓</button>
-              <button className="px-1.5 py-0.5 text-[13px] text-zinc-400 active:text-red-500 md:hover:text-red-500" onClick={() => deleteBlock(block.id)}>✕</button>
+              <button className="px-1.5 py-0.5 text-[13px] text-ink-3 active:text-ink disabled:opacity-30 md:hover:text-ink" disabled={i === 0} onClick={() => moveBlock(block.id, -1)}>↑</button>
+              <button className="px-1.5 py-0.5 text-[13px] text-ink-3 active:text-ink disabled:opacity-30 md:hover:text-ink" disabled={i === step.blocks.length - 1} onClick={() => moveBlock(block.id, 1)}>↓</button>
+              <button className="px-1.5 py-0.5 text-[13px] text-ink-3 active:text-red-500 md:hover:text-red-500" onClick={() => deleteBlock(block.id)}>✕</button>
             </div>
           </div>
         ))}
@@ -177,12 +178,12 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
   // ── Preview mode: full-screen on mobile, phone frame on desktop ──
   if (preview) {
     return (
-      <div className="flex h-[100dvh] flex-col bg-zinc-50">
-        <header className="flex h-12 shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-3">
-          <span className="truncate px-1 text-[14px] font-semibold text-zinc-800">{funnel.name}</span>
+      <div className="flex h-[100dvh] flex-col bg-canvas">
+        <header className="flex h-12 shrink-0 items-center justify-between border-b border-line bg-surface/75 px-3 backdrop-blur-xl backdrop-saturate-150">
+          <span className="truncate px-1 text-[14px] font-semibold tracking-tight text-ink">{funnel.name}</span>
           <button
             onClick={() => setPreview(false)}
-            className="rounded-lg bg-zinc-900 px-3.5 py-1.5 text-[13px] font-semibold text-white"
+            className="rounded-full bg-accent px-4 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-hover"
           >
             Done
           </button>
@@ -202,30 +203,31 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
   }
 
   return (
-    <div className="flex h-[100dvh] flex-col bg-zinc-50">
+    <div className="flex h-[100dvh] flex-col bg-canvas">
       {/* Top bar */}
-      <header className="flex h-12 shrink-0 items-center gap-2 border-b border-zinc-200 bg-white px-3 md:h-14 md:px-4">
+      <header className="flex h-12 shrink-0 items-center gap-2 border-b border-line bg-surface/75 px-3 backdrop-blur-xl backdrop-saturate-150 md:h-14 md:px-4">
         <Link
           href="/"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-zinc-400 active:bg-zinc-100 md:hover:bg-zinc-100 md:hover:text-zinc-700"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-3 transition-colors active:bg-fill md:hover:bg-fill md:hover:text-ink"
         >
           ←
         </Link>
         <input
           value={funnel.name}
           onChange={(e) => update({ ...funnel, name: e.target.value })}
-          className="min-w-0 flex-1 rounded-lg border border-transparent px-2 py-1.5 text-[14px] font-semibold outline-none md:w-64 md:flex-none md:hover:border-zinc-200 md:focus:border-zinc-500"
+          className="min-w-0 flex-1 rounded-[10px] border border-transparent bg-transparent px-2 py-1.5 text-[14px] font-semibold tracking-tight text-ink outline-none md:w-64 md:flex-none md:hover:border-line md:focus:border-accent"
         />
         <div className="ml-auto flex shrink-0 items-center gap-2">
+          <ThemeToggle />
           <button
             onClick={() => setPreview(true)}
-            className="rounded-xl bg-zinc-100 px-3.5 py-2 text-[13px] font-semibold text-zinc-700 active:bg-zinc-200 md:hover:bg-zinc-200"
+            className="rounded-full bg-fill px-4 py-2 text-[13px] font-medium text-ink transition-colors active:bg-fill-2 md:hover:bg-fill-2"
           >
             Preview
           </button>
           <button
             onClick={publish}
-            className="rounded-xl bg-zinc-900 px-3.5 py-2 text-[13px] font-semibold text-white shadow-sm active:bg-zinc-700 md:hover:bg-zinc-700"
+            className="rounded-full bg-accent px-4 py-2 text-[13px] font-medium text-white shadow-sm transition-colors active:bg-accent-hover md:hover:bg-accent-hover"
           >
             {copied ? "Copied!" : "Publish"}
           </button>
@@ -233,7 +235,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
       </header>
 
       {/* Mobile: step chips */}
-      <div className="flex shrink-0 items-center gap-1.5 overflow-x-auto border-b border-zinc-200 bg-white px-3 py-2 md:hidden">
+      <div className="flex shrink-0 items-center gap-1.5 overflow-x-auto border-b border-line bg-surface px-3 py-2 md:hidden">
         {funnel.steps.map((st, i) => (
           <button
             key={st.id}
@@ -242,8 +244,8 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
               setSelectedBlockId(null);
               setSheet("none");
             }}
-            className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ${
-              i === stepIndex ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600"
+            className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors ${
+              i === stepIndex ? "bg-ink text-canvas" : "bg-fill text-ink-2"
             }`}
           >
             {i + 1} · {st.name}
@@ -251,7 +253,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
         ))}
         <button
           onClick={addStep}
-          className="shrink-0 rounded-full border border-dashed border-zinc-300 px-3 py-1.5 text-[12.5px] font-semibold text-zinc-500"
+          className="shrink-0 rounded-full border border-dashed border-line px-3 py-1.5 text-[12.5px] font-medium text-ink-2"
         >
           +
         </button>
@@ -259,15 +261,15 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
 
       <div className="flex min-h-0 flex-1">
         {/* Desktop left: steps + blocks */}
-        <aside className="hidden w-60 shrink-0 flex-col overflow-y-auto border-r border-zinc-200 bg-white md:flex">
-          <div className="border-b border-zinc-100 p-3">
-            <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Steps</p>
+        <aside className="hidden w-60 shrink-0 flex-col overflow-y-auto border-r border-line bg-surface md:flex">
+          <div className="border-b border-line p-3">
+            <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-ink-3">Steps</p>
             <div className="flex flex-col gap-1">
               {funnel.steps.map((st, i) => (
                 <div
                   key={st.id}
-                  className={`group flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors ${
-                    i === stepIndex ? "bg-zinc-100 text-zinc-900" : "text-zinc-600 hover:bg-zinc-50"
+                  className={`group flex cursor-pointer items-center gap-2 rounded-[10px] px-2.5 py-2 text-[13px] font-medium transition-colors ${
+                    i === stepIndex ? "bg-fill text-ink" : "text-ink-2 hover:bg-fill"
                   }`}
                   onClick={() => {
                     setStepIndex(i);
@@ -276,7 +278,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
                 >
                   <span
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[11px] font-bold ${
-                      i === stepIndex ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-500"
+                      i === stepIndex ? "bg-accent text-white" : "bg-fill text-ink-3"
                     }`}
                   >
                     {i + 1}
@@ -288,35 +290,35 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
                       const steps = funnel.steps.map((x, idx) => (idx === i ? { ...x, name: e.target.value } : x));
                       update({ ...funnel, steps });
                     }}
-                    className="w-full min-w-0 bg-transparent outline-none"
+                    className="w-full min-w-0 bg-transparent text-ink outline-none"
                   />
                   <span className="hidden shrink-0 gap-0.5 group-hover:flex">
-                    <button className="text-zinc-300 hover:text-zinc-600" onClick={(e) => { e.stopPropagation(); moveStep(i, -1); }}>↑</button>
-                    <button className="text-zinc-300 hover:text-zinc-600" onClick={(e) => { e.stopPropagation(); moveStep(i, 1); }}>↓</button>
-                    <button className="text-zinc-300 hover:text-red-500" onClick={(e) => { e.stopPropagation(); deleteStep(i); }}>✕</button>
+                    <button className="text-ink-3 hover:text-ink" onClick={(e) => { e.stopPropagation(); moveStep(i, -1); }}>↑</button>
+                    <button className="text-ink-3 hover:text-ink" onClick={(e) => { e.stopPropagation(); moveStep(i, 1); }}>↓</button>
+                    <button className="text-ink-3 hover:text-red-500" onClick={(e) => { e.stopPropagation(); deleteStep(i); }}>✕</button>
                   </span>
                 </div>
               ))}
             </div>
             <button
               onClick={addStep}
-              className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-2 text-[12.5px] font-medium text-zinc-500 transition-colors hover:border-zinc-500 hover:text-zinc-900"
+              className="mt-2 w-full rounded-[10px] border border-dashed border-line py-2 text-[12.5px] font-medium text-ink-2 transition-colors hover:border-accent hover:text-accent"
             >
               + Add step
             </button>
           </div>
           <div className="p-3">
-            <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Add blocks</p>
+            <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-ink-3">Add blocks</p>
             <div className="grid grid-cols-2 gap-1.5">
               {BLOCK_TYPES.map((t) => (
                 <button
                   key={t}
                   onClick={() => addBlock(t)}
                   title={BLOCK_META[t].hint}
-                  className="flex flex-col items-start gap-1 rounded-xl border border-zinc-200 p-2.5 text-left transition-all hover:border-zinc-400 hover:bg-zinc-50 hover:shadow-sm"
+                  className="flex flex-col items-start gap-1 rounded-xl border border-line p-2.5 text-left transition-all hover:border-accent hover:bg-fill hover:shadow-sm"
                 >
                   <span className="text-[15px] leading-none">{BLOCK_META[t].icon}</span>
-                  <span className="text-[11.5px] font-semibold text-zinc-700">{BLOCK_META[t].label}</span>
+                  <span className="text-[11.5px] font-medium text-ink">{BLOCK_META[t].label}</span>
                 </button>
               ))}
             </div>
@@ -332,12 +334,12 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
         </main>
 
         {/* Desktop right: inspector */}
-        <aside className="hidden w-72 shrink-0 overflow-y-auto border-l border-zinc-200 bg-white p-4 md:block">
+        <aside className="hidden w-72 shrink-0 overflow-y-auto border-l border-line bg-surface p-4 md:block">
           <Inspector funnel={funnel} block={selectedBlock} onChangeBlock={changeBlock} onChangeFunnel={update} />
           {selectedBlock && (
             <button
               onClick={() => setSelectedBlockId(null)}
-              className="mt-5 w-full rounded-lg bg-zinc-100 py-2 text-[12.5px] font-medium text-zinc-600 transition-colors hover:bg-zinc-200"
+              className="mt-5 w-full rounded-full bg-fill py-2 text-[12.5px] font-medium text-ink transition-colors hover:bg-fill-2"
             >
               ← Funnel design settings
             </button>
@@ -346,10 +348,10 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
       </div>
 
       {/* Mobile bottom bar */}
-      <div className="flex shrink-0 items-center gap-2 border-t border-zinc-200 bg-white px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] md:hidden">
+      <div className="flex shrink-0 items-center gap-2 border-t border-line bg-surface px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] md:hidden">
         <button
           onClick={() => setSheet(sheet === "blocks" ? "none" : "blocks")}
-          className="flex-1 rounded-xl bg-zinc-900 py-3 text-[14px] font-semibold text-white active:bg-zinc-700"
+          className="flex-1 rounded-full bg-accent py-3 text-[14px] font-medium text-white active:bg-accent-hover"
         >
           + Block
         </button>
@@ -358,7 +360,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
             setSelectedBlockId(null);
             setSheet(sheet === "inspector" && !selectedBlock ? "none" : "inspector");
           }}
-          className="flex-1 rounded-xl bg-zinc-100 py-3 text-[14px] font-semibold text-zinc-700 active:bg-zinc-200"
+          className="flex-1 rounded-full bg-fill py-3 text-[14px] font-medium text-ink active:bg-fill-2"
         >
           Design
         </button>
@@ -367,24 +369,24 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
       {/* Mobile sheets */}
       {sheet !== "none" && (
         <div className="fixed inset-0 z-40 md:hidden" onClick={() => setSheet("none")}>
-          <div className="absolute inset-0 bg-black/30" />
+          <div className="absolute inset-0 bg-black/40" />
           <div
-            className="absolute inset-x-0 bottom-0 max-h-[72dvh] overflow-y-auto rounded-t-2xl bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl"
+            className="absolute inset-x-0 bottom-0 max-h-[72dvh] overflow-y-auto rounded-t-[20px] bg-surface p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-zinc-200" />
+            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-fill-2" />
             {sheet === "blocks" ? (
               <>
-                <p className="mb-3 text-[13px] font-bold text-zinc-900">Add a block</p>
+                <p className="mb-3 text-[13px] font-semibold tracking-tight text-ink">Add a block</p>
                 <div className="grid grid-cols-3 gap-2">
                   {BLOCK_TYPES.map((t) => (
                     <button
                       key={t}
                       onClick={() => addBlock(t)}
-                      className="flex flex-col items-center gap-1.5 rounded-xl border border-zinc-200 px-2 py-3 active:border-zinc-400 active:bg-zinc-100"
+                      className="flex flex-col items-center gap-1.5 rounded-xl border border-line px-2 py-3 active:border-accent active:bg-fill"
                     >
                       <span className="text-[18px] leading-none">{BLOCK_META[t].icon}</span>
-                      <span className="text-center text-[11px] font-semibold leading-tight text-zinc-700">
+                      <span className="text-center text-[11px] font-medium leading-tight text-ink">
                         {BLOCK_META[t].label}
                       </span>
                     </button>
@@ -396,7 +398,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
                 <Inspector funnel={funnel} block={selectedBlock} onChangeBlock={changeBlock} onChangeFunnel={update} />
                 <button
                   onClick={() => setSheet("none")}
-                  className="mt-5 w-full rounded-xl bg-zinc-900 py-3 text-[14px] font-semibold text-white"
+                  className="mt-5 w-full rounded-full bg-accent py-3 text-[14px] font-medium text-white"
                 >
                   Done
                 </button>

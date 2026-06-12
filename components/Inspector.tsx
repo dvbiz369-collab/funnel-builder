@@ -10,9 +10,9 @@ interface InspectorProps {
   onChangeFunnel: (funnel: Funnel) => void;
 }
 
-const labelCls = "mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-zinc-400";
+const labelCls = "mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-ink-3";
 const inputCls =
-  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-[13.5px] outline-none transition-colors focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200";
+  "w-full rounded-[10px] border border-line bg-surface px-3 py-2 text-[13.5px] text-ink outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -33,13 +33,15 @@ function Seg<T extends string>({
   onChange: (v: T) => void;
 }) {
   return (
-    <div className="flex rounded-lg bg-zinc-100 p-0.5">
+    <div className="flex rounded-[10px] bg-fill p-0.5">
       {options.map((o) => (
         <button
           key={o.value}
           onClick={() => onChange(o.value)}
-          className={`flex-1 rounded-md px-2 py-1.5 text-[12.5px] font-medium transition-colors ${
-            value === o.value ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-700"
+          className={`flex-1 rounded-lg px-2 py-1.5 text-[12.5px] font-medium transition-colors ${
+            value === o.value
+              ? "bg-white text-[#1d1d1f] shadow-sm dark:bg-[#636366] dark:text-white"
+              : "text-ink-2 hover:text-ink"
           }`}
         >
           {o.label}
@@ -52,9 +54,9 @@ function Seg<T extends string>({
 function Toggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <button onClick={() => onChange(!checked)} className="flex w-full items-center justify-between py-1">
-      <span className="text-[13.5px] font-medium text-zinc-700">{label}</span>
+      <span className="text-[13.5px] font-medium text-ink">{label}</span>
       <span
-        className={`relative h-5 w-9 rounded-full transition-colors ${checked ? "bg-zinc-900" : "bg-zinc-200"}`}
+        className={`relative h-5 w-9 rounded-full transition-colors ${checked ? "bg-switch-on" : "bg-fill-2"}`}
       >
         <span
           className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
@@ -72,8 +74,8 @@ export default function Inspector({ funnel, block, onChangeBlock, onChangeFunnel
     return (
       <div className="flex flex-col gap-5">
         <div>
-          <h3 className="text-[13px] font-bold text-zinc-900">Funnel design</h3>
-          <p className="text-[12px] text-zinc-400">Applies to every step</p>
+          <h3 className="text-[13px] font-semibold tracking-tight text-ink">Funnel design</h3>
+          <p className="text-[12px] text-ink-3">Applies to every step</p>
         </div>
         <Field label="Brand color">
           <div className="flex flex-wrap gap-2">
@@ -82,7 +84,7 @@ export default function Inspector({ funnel, block, onChangeBlock, onChangeFunnel
                 key={c}
                 onClick={() => onChangeFunnel({ ...funnel, theme: { ...funnel.theme, primary: c } })}
                 className={`h-7 w-7 rounded-full transition-transform hover:scale-110 ${
-                  funnel.theme.primary === c ? "ring-2 ring-zinc-900 ring-offset-2" : ""
+                  funnel.theme.primary === c ? "ring-2 ring-accent ring-offset-2 ring-offset-surface" : ""
                 }`}
                 style={{ background: c }}
               />
@@ -91,7 +93,7 @@ export default function Inspector({ funnel, block, onChangeBlock, onChangeFunnel
               type="color"
               value={funnel.theme.primary}
               onChange={(e) => onChangeFunnel({ ...funnel, theme: { ...funnel.theme, primary: e.target.value } })}
-              className="h-7 w-7 cursor-pointer rounded-full border border-zinc-200"
+              className="h-7 w-7 cursor-pointer rounded-full border border-line"
               title="Custom color"
             />
           </div>
@@ -118,7 +120,7 @@ export default function Inspector({ funnel, block, onChangeBlock, onChangeFunnel
             onChange={(font) => onChangeFunnel({ ...funnel, theme: { ...funnel.theme, font } })}
           />
         </Field>
-        <div className="border-t border-zinc-100 pt-4">
+        <div className="border-t border-line pt-4">
           <Field label="Lead webhook URL">
             <input
               className={inputCls}
@@ -126,7 +128,7 @@ export default function Inspector({ funnel, block, onChangeBlock, onChangeFunnel
               value={funnel.webhookUrl}
               onChange={(e) => onChangeFunnel({ ...funnel, webhookUrl: e.target.value })}
             />
-            <p className="mt-1.5 text-[11.5px] leading-relaxed text-zinc-400">
+            <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-3">
               Form submissions POST here as JSON (works with GoHighLevel, Make, Zapier, n8n inbound webhooks).
             </p>
           </Field>
@@ -230,7 +232,7 @@ export default function Inspector({ funnel, block, onChangeBlock, onChangeFunnel
                 value={block.phone ?? ""}
                 onChange={(e) => set({ phone: e.target.value })}
               />
-              <p className="mt-1.5 text-[11.5px] leading-relaxed text-zinc-400">
+              <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-3">
                 Tap dials this number directly — perfect for &ldquo;Call us now&rdquo; on mobile.
               </p>
             </Field>
@@ -249,7 +251,7 @@ export default function Inspector({ funnel, block, onChangeBlock, onChangeFunnel
               {block.options.map((opt, i) => (
                 <div key={opt.id} className="flex items-center gap-1.5">
                   <input
-                    className="w-11 rounded-lg border border-zinc-200 px-0 py-2 text-center text-[14px] outline-none focus:border-zinc-500"
+                    className="w-11 rounded-[10px] border border-line bg-surface px-0 py-2 text-center text-[14px] text-ink outline-none focus:border-accent"
                     value={opt.emoji}
                     onChange={(e) => {
                       const options = [...block.options];
@@ -267,7 +269,7 @@ export default function Inspector({ funnel, block, onChangeBlock, onChangeFunnel
                     }}
                   />
                   <button
-                    className="px-1 text-zinc-300 transition-colors hover:text-red-500"
+                    className="px-1 text-ink-3 transition-colors hover:text-red-500"
                     onClick={() => set({ options: block.options.filter((o) => o.id !== opt.id) } as Partial<ChoiceBlock>)}
                   >
                     ✕
@@ -275,7 +277,7 @@ export default function Inspector({ funnel, block, onChangeBlock, onChangeFunnel
                 </div>
               ))}
               <button
-                className="rounded-lg border border-dashed border-zinc-300 py-2 text-[12.5px] font-medium text-zinc-500 transition-colors hover:border-zinc-500 hover:text-zinc-900"
+                className="rounded-[10px] border border-dashed border-line py-2 text-[12.5px] font-medium text-ink-2 transition-colors hover:border-accent hover:text-accent"
                 onClick={() =>
                   set({ options: [...block.options, { id: uid(), emoji: "💡", label: "New option" }] } as Partial<ChoiceBlock>)
                 }
@@ -324,7 +326,7 @@ export default function Inspector({ funnel, block, onChangeBlock, onChangeFunnel
                 value={block.successHref ?? ""}
                 onChange={(e) => set({ successHref: e.target.value })}
               />
-              <p className="mt-1.5 text-[11.5px] leading-relaxed text-zinc-400">
+              <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-3">
                 Opens after the lead is captured — perfect for delivering a lead magnet (PDF, Notion doc, video).
               </p>
             </Field>
@@ -337,7 +339,7 @@ export default function Inspector({ funnel, block, onChangeBlock, onChangeFunnel
         <Pane title="Video">
           <Field label="Video URL">
             <input className={inputCls} placeholder="YouTube, Vimeo, Loom or .mp4 link" value={block.url} onChange={(e) => set({ url: e.target.value })} />
-            <p className="mt-1.5 text-[11.5px] leading-relaxed text-zinc-400">
+            <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-3">
               Paste a YouTube, Vimeo or Loom link — or a direct .mp4/.webm URL to use your own video.
             </p>
           </Field>
@@ -377,7 +379,7 @@ export default function Inspector({ funnel, block, onChangeBlock, onChangeFunnel
               value={block.url}
               onChange={(e) => set({ url: e.target.value })}
             />
-            <p className="mt-1.5 text-[11.5px] leading-relaxed text-zinc-400">
+            <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-3">
               Paste your Calendly event link — the booking calendar embeds right inside the funnel step. Tip: put it
               on the step after the lead form so you capture contact info even if they don&rsquo;t book.
             </p>
@@ -408,8 +410,8 @@ function Pane({ title, children }: { title: string; children: React.ReactNode })
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h3 className="text-[13px] font-bold text-zinc-900">{title}</h3>
-        <p className="text-[12px] text-zinc-400">Block settings</p>
+        <h3 className="text-[13px] font-semibold tracking-tight text-ink">{title}</h3>
+        <p className="text-[12px] text-ink-3">Block settings</p>
       </div>
       {children}
     </div>

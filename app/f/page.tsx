@@ -25,10 +25,10 @@ export default function PublishedFunnel() {
 
   if (error)
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-3 bg-zinc-50 text-zinc-500">
+      <div className="flex h-screen flex-col items-center justify-center gap-3 bg-canvas text-ink-2">
         <span className="text-3xl">🔗</span>
         <p className="text-[14px]">This funnel link is invalid or incomplete.</p>
-        <Link href="/" className="text-[14px] font-semibold text-zinc-900">
+        <Link href="/" className="text-[14px] font-medium text-accent">
           Build your own funnel →
         </Link>
       </div>
@@ -37,7 +37,7 @@ export default function PublishedFunnel() {
   if (!funnel) return null;
 
   return (
-    <div className="flex h-[100dvh] w-full justify-center bg-zinc-100">
+    <div className="flex h-[100dvh] w-full justify-center bg-canvas">
       <div className="h-full w-full max-w-md bg-white shadow-2xl">
         <FunnelRunner funnel={funnel} />
       </div>

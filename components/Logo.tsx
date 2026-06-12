@@ -1,7 +1,7 @@
 export default function Logo({ size = 32 }: { size?: number }) {
   return (
     <span
-      className="flex items-center justify-center rounded-xl bg-zinc-900 shadow-sm"
+      className="flex items-center justify-center rounded-xl bg-ink shadow-sm"
       style={{ width: size, height: size }}
     >
       <svg
@@ -9,7 +9,7 @@ export default function Logo({ size = 32 }: { size?: number }) {
         height={size * 0.55}
         viewBox="0 0 24 24"
         fill="none"
-        stroke="white"
+        style={{ stroke: "var(--canvas)" }}
         strokeWidth="2.4"
         strokeLinecap="round"
         strokeLinejoin="round"
